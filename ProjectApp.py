@@ -438,10 +438,6 @@ if salary_file and inflation_file:
                 "Сравнение отраслей"
              )
 
-            # -------------------------------------------------
-            # РАСЧЁТ ТЕМПОВ РОСТА
-            # -------------------------------------------------
-
             growth_df = calculate_growth(
                 all_nominal
             )
@@ -453,10 +449,6 @@ if salary_file and inflation_file:
             industries = sorted(
                 growth_long["Отрасль"].unique()
             )
-
-            # -------------------------------------------------
-            # ВЫБОР ОТРАСЛЕЙ
-            # -------------------------------------------------
 
             col1, col2 = st.columns(2)
 
@@ -479,10 +471,6 @@ if salary_file and inflation_file:
                     )
                 )
 
-            # -------------------------------------------------
-            # ФИЛЬТРАЦИЯ ДАННЫХ
-            # -------------------------------------------------
-
             compare_df = growth_long[
                 growth_long["Отрасль"].isin(
                     [
@@ -491,10 +479,6 @@ if salary_file and inflation_file:
                     ]
                 )
             ]
-
-            # -------------------------------------------------
-            # ГРАФИК
-            # -------------------------------------------------
 
             fig_compare = px.line(
                 compare_df,
@@ -515,22 +499,11 @@ if salary_file and inflation_file:
                 legend_title="Отрасль",
                 height=600
             )
+            
 
             st.plotly_chart(
                 fig_compare,
                 use_container_width=True
             )
 
-            # -------------------------------------------------
-            # ТАБЛИЦА
-            # -------------------------------------------------
-
-            st.subheader(
-                "Данные"
-            )
-
-            st.dataframe(
-                compare_df.round(2),
-                use_container_width=True
-            )
 
