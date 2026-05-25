@@ -1,6 +1,6 @@
 import pandas as pd
 import streamlit as st
-
+import plotly.express as px
 from io import BytesIO
 
 
@@ -247,9 +247,11 @@ if salary_file and inflation_file:
     (
         tab1,
         tab2,
+        tab3
     ) = st.tabs([
         "Динамика",
-        "Итоги"
+        "Итоги",
+        "Сравнение"
     ])
 
 
@@ -429,5 +431,106 @@ if salary_file and inflation_file:
             st.metric(
                 "Рост за период",
                 f"{metrics['total_growth']:.1f}%"
+            )
+        with tab3:
+
+            st.subheader(
+                "Сравнение отраслей"
+             )
+
+            # -------------------------------------------------
+            # РАСЧЁТ ТЕМПОВ РОСТА
+            # -------------------------------------------------
+
+            growth_df = calculate_growth(
+                all_nominal
+            )
+
+            growth_long = prepare_growth_long(
+                growth_df
+            )
+
+            industries = sorted(
+                growth_long["Отрасль"].unique()
+            )
+
+            # -------------------------------------------------
+            # ВЫБОР ОТРАСЛЕЙ
+            # -------------------------------------------------
+
+            col1, col2 = st.columns(2)
+
+            with col1:
+
+                industry1 = st.selectbox(
+                    "Область 1",
+                    industries,
+                    index=0
+                )
+
+            with col2:
+
+                industry2 = st.selectbox(
+                    "Область 2",
+                    industries,
+                    index=min(
+                        1,
+                        len(industries) - 1
+                    )
+                )
+
+            # -------------------------------------------------
+            # ФИЛЬТРАЦИЯ ДАННЫХ
+            # -------------------------------------------------
+
+            compare_df = growth_long[
+                growth_long["Отрасль"].isin(
+                    [
+                        industry1,
+                        industry2
+                    ]
+                )
+            ]
+
+            # -------------------------------------------------
+            # ГРАФИК
+            # -------------------------------------------------
+
+            fig_compare = px.line(
+                compare_df,
+                x="Год",
+                y="Рост, %",
+                color="Отрасль",
+                markers=True,
+                title=(
+                    "Сравнение темпов роста зарплат"
+                )
+            )
+
+            fig_compare.update_layout(
+                template="plotly_white",
+                hovermode="x unified",
+                xaxis_title="Год",
+                yaxis_title="Темп роста (%)",
+                legend_title="Отрасль",
+                height=600
+            )
+
+            st.plotly_chart(
+                fig_compare,
+                use_container_width=True
+            )
+
+            # -------------------------------------------------
+            # ТАБЛИЦА
+            # -------------------------------------------------
+
+            st.subheader(
+                "Данные"
+            )
+
+            st.dataframe(
+                compare_df.round(2),
+                use_container_width=True
             )
 
